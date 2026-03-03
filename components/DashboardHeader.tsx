@@ -6,7 +6,11 @@ interface DashboardHeaderProps {
   playClickSound: () => void;
 }
 
+import { useTactical } from '../context/TacticalContext';
+
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ playHoverSound, playClickSound }) => {
+  const { isSynced } = useTactical();
+
   return (
     <header className="sticky top-0 z-50 bg-gray-950/90 backdrop-blur-md border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -25,10 +29,16 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ playHoverSound, playC
             </div>
           </div>
           <div className="flex items-center gap-4">
-             <button onMouseEnter={playHoverSound} onClick={playClickSound} className="text-gray-400 hover:text-white transition-colors" title="Compartir Dossier">
+             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800">
+                <div className={`w-2 h-2 rounded-full ${isSynced ? 'bg-lime-400 animate-pulse' : 'bg-red-500'}`} />
+                <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-tighter">
+                    {isSynced ? 'Bunker Sync: Active' : 'Bunker Sync: Offline'}
+                </span>
+             </div>
+             <button onMouseEnter={playHoverSound} onClick={playClickSound} className="text-gray-400 hover:text-white transition-colors" title="Share Dossier">
                <Share2 size={20} />
              </button>
-             <button onMouseEnter={playHoverSound} onClick={playClickSound} className="text-gray-400 hover:text-white transition-colors" title="Menú de Navegación">
+             <button onMouseEnter={playHoverSound} onClick={playClickSound} className="text-gray-400 hover:text-white transition-colors" title="Navigation Menu">
                <Menu size={24} />
              </button>
           </div>

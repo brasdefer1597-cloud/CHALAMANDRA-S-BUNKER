@@ -35,7 +35,7 @@ export const fastResponse = async (prompt: string): Promise<string> => {
     const ai = getAI();
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
                 systemInstruction: "You are the 'Tactical Quick-Response' unit. Be extremely fast, direct, and concise."
@@ -196,15 +196,36 @@ export const editImageFlash = async (base64Img: string, prompt: string) => {
 
 // --- AUDIO/LIVE API ---
 
-export const transcribeAudio = async (base64Audio: string) => {
+export const transcribeAudio = async (base64Audio: string, mimeType: string = 'audio/webm') => {
     const ai = getAI();
     const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: {
-            parts: [{ inlineData: { data: base64Audio, mimeType: 'audio/pcm;rate=16000' } }, { text: "Transcribe this audio report exactly." }]
+            parts: [{ inlineData: { data: base64Audio, mimeType } }, { text: "Transcribe this audio report exactly." }]
         }
     });
     return response.text;
+};
+
+export const analyzeMedia = async (base64Data: string, mimeType: string, prompt: string): Promise<string> => {
+    const ai = getAI();
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-3.1-pro-preview',
+            contents: {
+                parts: [
+                    { inlineData: { data: base64Data, mimeType } },
+                    { text: `Analyze this tactical evidence/media: ${prompt}` }
+                ]
+            },
+            config: {
+                systemInstruction: "You are the Master Decoder. Analyze the provided document, image, or video as criminal evidence. Extract key names, locations, dates, and tactical implications."
+            }
+        });
+        return response.text || "Analysis failed.";
+    } catch (e) {
+        throw new GeminiServiceError("Evidence analysis server failure.");
+    }
 };
 
 export const generateSpeech = async (text: string, voice: 'Kore' | 'Puck' | 'Charon' | 'Fenrir' | 'Zephyr' = 'Zephyr') => {

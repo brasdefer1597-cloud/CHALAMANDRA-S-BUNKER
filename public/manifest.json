@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "DecoX Dossier: Bunker Network",
+  "version": "2.0.0",
+  "description": "Tactical Intelligence Terminal & Criminal Chess Analyzer",
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Open Bunker"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "https://*.run.app/*"
+  ]
+}
