@@ -1,6 +1,6 @@
 
-import { GoogleGenAI, Modality, Type } from '@google/genai';
-import { ChatMessage, ChessPiece } from '../types';
+import { GoogleGenAI, Modality, Type, ThinkingLevel } from '@google/genai';
+import { ChatMessage, ChessPiece, TacticalState } from '../types';
 
 // La API Key se obtiene de process.env.API_KEY
 const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY! });
@@ -18,16 +18,32 @@ export const analyzeThinking = async (prompt: string): Promise<string> => {
     const ai = getAI();
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-3-pro-preview',
+            model: 'gemini-3.1-pro-preview',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: 32768 },
+                thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
                 systemInstruction: "You are the Master Decoder. Tone: 'Malandra Fresa'. Analyze with extreme depth, no beating around the bush, street-smart but refined."
             }
         });
         return response.text || "";
     } catch (e) {
         throw new GeminiServiceError("The bunker's brain is saturated. Retry the move.");
+    }
+};
+
+export const fastResponse = async (prompt: string): Promise<string> => {
+    const ai = getAI();
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash-lite',
+            contents: prompt,
+            config: {
+                systemInstruction: "You are the 'Tactical Quick-Response' unit. Be extremely fast, direct, and concise."
+            }
+        });
+        return response.text || "";
+    } catch (e) {
+        return "System lag detected.";
     }
 };
 
@@ -70,12 +86,13 @@ export const mapsGrounding = async (query: string, lat?: number, lng?: number) =
 };
 
 // FIX: Added generateCounterStrategy to handle piece-specific tactical analysis
-export const generateCounterStrategy = async (piece: ChessPiece): Promise<string> => {
+export const generateCounterStrategy = async (piece: ChessPiece, tacticalState?: TacticalState): Promise<string> => {
     const ai = getAI();
+    const context = tacticalState ? `\nPreviously analyzed targets: ${tacticalState.analyzedPieces.join(", ")}.\nGlobal Risk Level: ${tacticalState.globalRiskLevel}.` : "";
     const prompt = `Analyze the archetype '${piece.criminalRole}' (based on the chess '${piece.name}'). 
     Description: ${piece.description}. 
     Criminal function: ${piece.criminalFunction}. 
-    Risk level: ${piece.riskLevel}.
+    Risk level: ${piece.riskLevel}.${context}
     
     Provide a detailed neutralization plan or counter-strategy.`;
     
@@ -101,7 +118,11 @@ export const generateChatContent = async (history: ChatMessage[]): Promise<strin
             model: 'gemini-3-flash-preview',
             contents: history.map(m => ({
                 role: m.role,
-                parts: m.parts.map(p => ({ text: p.text }))
+                parts: m.parts.map(p => {
+                    if (p.text) return { text: p.text };
+                    if (p.inlineData) return { inlineData: p.inlineData };
+                    return { text: "" };
+                })
             })),
             config: {
                 systemInstruction: "You are the 'Tactical Analyst', an expert in the 'Criminal Chess' analogy. Maintain a professional, analytical, and enigmatic tone. Respond about roles and strategies."
@@ -184,4 +205,23 @@ export const transcribeAudio = async (base64Audio: string) => {
         }
     });
     return response.text;
+};
+
+export const generateSpeech = async (text: string, voice: 'Kore' | 'Puck' | 'Charon' | 'Fenrir' | 'Zephyr' = 'Zephyr') => {
+    const ai = getAI();
+    const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash-preview-tts",
+        contents: [{ parts: [{ text }] }],
+        config: {
+            responseModalities: [Modality.AUDIO],
+            speechConfig: {
+                voiceConfig: {
+                    prebuiltVoiceConfig: { voiceName: voice },
+                },
+            },
+        },
+    });
+
+    const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+    return base64Audio ? `data:audio/wav;base64,${base64Audio}` : null;
 };

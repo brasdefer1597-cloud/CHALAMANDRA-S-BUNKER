@@ -1,15 +1,21 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageSquare, Send, X, Bot } from 'lucide-react';
-import { generateChatContent } from '../services/geminiService';
+import { generateChatContent, generateSpeech, transcribeAudio } from '../services/geminiService';
 import { ChatMessage } from '../types';
+import { useTactical } from '../context/TacticalContext';
+import { Mic, MicOff, Volume2 } from 'lucide-react';
 
 const Chatbot: React.FC = () => {
+    const { state: tacticalState, addToHistory } = useTactical();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([
         { role: 'model', parts: [{ text: "Greetings. I am the Tactical Analyst. Which aspect of the strategy do you wish to analyze?" }] }
     ]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const audioChunksRef = useRef<Blob[]>([]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const playSound = useCallback((id: string) => {
@@ -19,6 +25,65 @@ const Chatbot: React.FC = () => {
             audio.play().catch(e => console.error("Audio playback failed:", e));
         }
     }, []);
+
+    const playAIResponse = async (text: string) => {
+        try {
+            const audioUrl = await generateSpeech(text);
+            if (audioUrl) {
+                const audio = new Audio(audioUrl);
+                audio.play();
+            }
+        } catch (e) {
+            console.error("TTS failed:", e);
+        }
+    };
+
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            audioChunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunksRef.current.push(event.data);
+            };
+
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                reader.onloadend = async () => {
+                    const base64Audio = (reader.result as string).split(',')[1];
+                    setIsLoading(true);
+                    try {
+                        const transcription = await transcribeAudio(base64Audio);
+                        if (transcription) {
+                            setInputValue(transcription);
+                        }
+                    } catch (e) {
+                        console.error("Transcription failed:", e);
+                    } finally {
+                        setIsLoading(false);
+                    }
+                };
+            };
+
+            mediaRecorder.start();
+            setIsRecording(true);
+            playSound('audio-click');
+        } catch (e) {
+            console.error("Microphone access denied:", e);
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+            playSound('audio-click');
+        }
+    };
 
     const toggleChat = () => {
         setIsOpen(!isOpen);
@@ -35,15 +100,20 @@ const Chatbot: React.FC = () => {
         }
     }, [messages, isOpen]);
 
-    const handleSendMessage = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSendMessage = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
         const trimmedInput = inputValue.trim();
         if (!trimmedInput) return;
 
         playSound('audio-click');
         const userMessage: ChatMessage = { role: 'user', parts: [{ text: trimmedInput }] };
-        const newMessages = [...messages, userMessage];
-        setMessages(newMessages);
+        
+        // Add tactical context to the first message if it's the start of a conversation or periodically
+        const contextText = `[TACTICAL CONTEXT: Analyzed pieces: ${tacticalState.analyzedPieces.join(", ")}. Last strategy: ${tacticalState.lastStrategy || "None"}] `;
+        const messageWithContext = { ...userMessage, parts: [{ text: contextText + trimmedInput }] };
+
+        const newMessages = [...messages, messageWithContext];
+        setMessages(prev => [...prev, userMessage]);
         setInputValue('');
         setIsLoading(true);
 
@@ -51,7 +121,9 @@ const Chatbot: React.FC = () => {
             const modelResponseText = await generateChatContent(newMessages);
             const modelMessage: ChatMessage = { role: 'model', parts: [{ text: modelResponseText }] };
             setMessages(prevMessages => [...prevMessages, modelMessage]);
+            addToHistory(`Chat: ${trimmedInput.substring(0, 20)}...`);
             playSound('audio-success');
+            playAIResponse(modelResponseText);
         } catch (error: any) {
             const errorMessage: ChatMessage = { role: 'model', parts: [{ text: error.message || "An error occurred while processing your request." }] };
             setMessages(prevMessages => [...prevMessages, errorMessage]);
@@ -112,6 +184,14 @@ const Chatbot: React.FC = () => {
 
                     <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-700 shrink-0">
                         <div className="flex items-center gap-2">
+                            <button 
+                                type="button"
+                                onClick={isRecording ? stopRecording : startRecording}
+                                className={`p-2 rounded-full transition-colors ${isRecording ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
+                                title={isRecording ? "Stop recording" : "Record audio"}
+                            >
+                                {isRecording ? <MicOff size={20} /> : <Mic size={20} />}
+                            </button>
                             <input
                                 type="text"
                                 value={inputValue}

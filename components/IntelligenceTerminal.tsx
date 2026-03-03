@@ -1,33 +1,61 @@
 import React, { useState } from 'react';
-import { Video, Image as ImageIcon, Map, Search, Brain, Zap, Loader2, Play } from 'lucide-react';
-import { generateVideoVeo, generateImagePro, searchGrounding, mapsGrounding, analyzeThinking } from '../services/geminiService';
+import { Video, Image as ImageIcon, Map, Search, Brain, Zap, Loader2, Play, Edit, Globe } from 'lucide-react';
+import { generateVideoVeo, generateImagePro, searchGrounding, mapsGrounding, analyzeThinking, editImageFlash } from '../services/geminiService';
+import { useTactical } from '../context/TacticalContext';
 
 const IntelligenceTerminal: React.FC = () => {
-    const [mode, setMode] = useState<'video' | 'image' | 'grounding' | 'thinking'>('thinking');
+    const { addToHistory } = useTactical();
+    const [mode, setMode] = useState<'video' | 'image' | 'grounding' | 'thinking' | 'maps' | 'edit'>('thinking');
     const [input, setInput] = useState('');
     const [result, setResult] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    const [aspectRatio, setAspectRatio] = useState<'1:1' | '2:3' | '3:2' | '3:4' | '4:3' | '9:16' | '16:9' | '21:9'>('16:9');
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setSelectedImage(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const handleAction = async () => {
-        if (!input) return;
+        if (!input && mode !== 'edit') return;
         setLoading(true);
         setResult(null);
         try {
             if (mode === 'thinking') {
                 const res = await analyzeThinking(input);
                 setResult({ text: res });
+                addToHistory(`Thinking: ${input.substring(0, 20)}...`);
             } else if (mode === 'grounding') {
                 const res = await searchGrounding(input);
                 setResult(res);
+                addToHistory(`Search: ${input.substring(0, 20)}...`);
+            } else if (mode === 'maps') {
+                const res = await mapsGrounding(input);
+                setResult(res);
+                addToHistory(`Maps: ${input.substring(0, 20)}...`);
             } else if (mode === 'video') {
                 if (!(await window.aistudio.hasSelectedApiKey())) {
                     await window.aistudio.openSelectKey();
                 }
                 const res = await generateVideoVeo(input);
                 setResult({ video: res });
+                addToHistory(`Video: ${input.substring(0, 20)}...`);
             } else if (mode === 'image') {
-                const res = await generateImagePro(input, '1K', '16:9');
+                const res = await generateImagePro(input, '1K', aspectRatio);
                 setResult({ image: res });
+                addToHistory(`Image: ${input.substring(0, 20)}...`);
+            } else if (mode === 'edit') {
+                if (!selectedImage) throw new Error("Upload an image first.");
+                const res = await editImageFlash(selectedImage, input);
+                setResult({ image: res });
+                addToHistory(`Edit: ${input.substring(0, 20)}...`);
             }
         } catch (e: any) {
             setResult({ error: e.message });
@@ -41,7 +69,9 @@ const IntelligenceTerminal: React.FC = () => {
                 {[
                     { id: 'thinking', icon: Brain, label: 'Thinking Mode' },
                     { id: 'grounding', icon: Search, label: 'Real Tracking' },
+                    { id: 'maps', icon: Globe, label: 'Safe Houses' },
                     { id: 'image', icon: ImageIcon, label: 'Visual Pro' },
+                    { id: 'edit', icon: Edit, label: 'Visual Recon' },
                     { id: 'video', icon: Video, label: 'Veo Cinematic' }
                 ].map(m => (
                     <button
@@ -58,6 +88,29 @@ const IntelligenceTerminal: React.FC = () => {
             </div>
 
             <div className="space-y-4">
+                {mode === 'image' && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                        {['1:1', '2:3', '3:2', '3:4', '4:3', '9:16', '16:9', '21:9'].map(r => (
+                            <button
+                                key={r}
+                                onClick={() => setAspectRatio(r as any)}
+                                className={`px-3 py-1 text-xs rounded-md border transition-all ${aspectRatio === r ? 'bg-fuchsia-500 border-fuchsia-400 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-500'}`}
+                            >
+                                {r}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
+                {mode === 'edit' && (
+                    <div className="mb-4">
+                        <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" id="image-upload" />
+                        <label htmlFor="image-upload" className="flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-zinc-800 rounded-xl cursor-pointer hover:border-fuchsia-500/50 transition-all text-zinc-500 hover:text-fuchsia-400">
+                            {selectedImage ? <img src={selectedImage} className="h-20 rounded-md" /> : <><ImageIcon size={24} /> Upload Target Image</>}
+                        </label>
+                    </div>
+                )}
+
                 <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}

@@ -11,7 +11,10 @@ interface PieceDetailProps {
   playSuccessSound: () => void;
 }
 
+import { useTactical } from '../context/TacticalContext';
+
 const PieceDetail: React.FC<PieceDetailProps> = ({ piece, playClickSound, playSuccessSound }) => {
+  const { state: tacticalState, addAnalyzedPiece, setLastStrategy, addToHistory } = useTactical();
   const Icon = typeof piece.icon === 'string' ? iconMap[piece.icon] : piece.icon;
   const [generatedStrategy, setGeneratedStrategy] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -31,8 +34,11 @@ const PieceDetail: React.FC<PieceDetailProps> = ({ piece, playClickSound, playSu
     setGeneratedStrategy('');
     
     try {
-      const result = await generateCounterStrategy(piece);
+      const result = await generateCounterStrategy(piece, tacticalState);
       setGeneratedStrategy(result);
+      setLastStrategy(result);
+      addAnalyzedPiece(piece.name);
+      addToHistory(`Analyzed ${piece.criminalRole} (${piece.name})`);
       playSuccessSound();
     } catch (e: any) {
       setGenerationError(e.message || "Failed to contact the AI engine. Try again.");

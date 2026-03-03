@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Dices, Activity, Swords } from 'lucide-react';
-import { simulateScenario } from '../services/geminiService';
+import { analyzeThinking } from '../services/geminiService';
+import { useTactical } from '../context/TacticalContext';
 
 const StrategySimulator: React.FC = () => {
+  const { addToHistory } = useTactical();
   const [scenarioInput, setScenarioInput] = useState('');
   const [simulationResult, setSimulationResult] = useState<string | null>(null);
   const [displayedResult, setDisplayedResult] = useState<string>('');
@@ -34,8 +36,9 @@ const StrategySimulator: React.FC = () => {
     setSimulationError(null);
 
     try {
-      const resultText = await simulateScenario(scenarioInput);
+      const resultText = await analyzeThinking(`Simulate the counter-move of the authorities in response to this scenario: ${scenarioInput}`);
       setSimulationResult(resultText);
+      addToHistory(`Simulation: ${scenarioInput.substring(0, 20)}...`);
     } catch (e: any) {
       setSimulationError(e.message || "Scenario simulation failed. Try again.");
     } finally {

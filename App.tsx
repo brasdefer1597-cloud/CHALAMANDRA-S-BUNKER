@@ -12,9 +12,13 @@ import { CHESS_PIECES, STRATEGIES, REALITY_CHECKS } from './constants/appData';
 import { ChessPiece } from './types';
 // FIX: Added ShieldAlert to imports
 import { Info, AlertTriangle, Terminal, Mic, ShieldAlert } from 'lucide-react';
+import { TacticalProvider } from './context/TacticalContext';
 import { useAudio } from './hooks/useAudio';
 
-function App() {
+import { useTactical } from './context/TacticalContext';
+
+function AppContent() {
+  const { state: tacticalState } = useTactical();
   const [activeTab, setActiveTab] = useState<'hierarchy' | 'strategy' | 'terminal'>('hierarchy');
   const [selectedPiece, setSelectedPiece] = useState<ChessPiece>(CHESS_PIECES[0]);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,21 +52,21 @@ function App() {
         <div className="mb-12 text-center max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuchsia-500/10 border border-fuchsia-500/30 text-fuchsia-400 text-xs font-black uppercase tracking-[0.2em] mb-6">
             <ShieldAlert size={14} />
-            Acceso Nivel Élite // SRAP PROTOCOL
+            Elite Level Access // SRAP PROTOCOL
           </div>
           <h2 className="text-4xl md:text-6xl font-black text-white mb-6 leading-tight italic">
-            EL BÚNKER DE <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 to-lime-400 animate-glitch">CHALAMANDRA</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 to-lime-400 animate-glitch">CHALAMANDRA'S</span> BUNKER
           </h2>
           <p className="text-zinc-400 text-xl font-light max-w-2xl mx-auto border-l-2 border-fuchsia-500 pl-6 text-left italic">
-            "En la calle mandan los peones, en el búnker manda la visión. Aquí no jugamos ajedrez, decodificamos el destino."
+            "On the street, pawns rule; in the bunker, vision rules. Here we don't play chess, we decode destiny."
           </p>
         </div>
 
         <div className="flex flex-wrap justify-center gap-3 mb-10">
             {[
-                { id: 'hierarchy', label: 'La Jerarquía', icon: Info },
-                { id: 'strategy', label: 'Estrategia', icon: AlertTriangle },
-                { id: 'terminal', label: 'Terminal Inteligencia', icon: Terminal }
+                { id: 'hierarchy', label: 'The Hierarchy', icon: Info },
+                { id: 'strategy', label: 'Strategy', icon: AlertTriangle },
+                { id: 'terminal', label: 'Intelligence Terminal', icon: Terminal }
             ].map(tab => (
                 <button
                     key={tab.id}
@@ -104,15 +108,34 @@ function App() {
 
             <div className="xl:col-span-1 space-y-8">
                 <VoiceIntelligence />
+                
                 <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl">
                     <h4 className="text-fuchsia-400 font-black uppercase tracking-tighter mb-4 flex items-center gap-2">
-                        <Info size={16} /> Estado del Sistema
+                        <Terminal size={16} /> Tactical History
+                    </h4>
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto scrollbar-hide">
+                        {tacticalState.sessionHistory.length === 0 ? (
+                            <p className="text-zinc-600 text-xs italic">No operations logged.</p>
+                        ) : (
+                            tacticalState.sessionHistory.map((entry, i) => (
+                                <div key={i} className="text-[10px] font-mono text-zinc-400 border-l border-fuchsia-500/30 pl-2 py-1">
+                                    <span className="text-fuchsia-500/50 mr-2">[{new Date().toLocaleTimeString()}]</span>
+                                    {entry}
+                                </div>
+                            )).reverse()
+                        )}
+                    </div>
+                </div>
+
+                <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl">
+                    <h4 className="text-fuchsia-400 font-black uppercase tracking-tighter mb-4 flex items-center gap-2">
+                        <Info size={16} /> System Status
                     </h4>
                     <ul className="space-y-3 text-xs font-mono text-zinc-500">
-                        <li className="flex justify-between border-b border-zinc-800 pb-1"><span>LATENCIA IA:</span> <span className="text-lime-400">OPTIMIZADO</span></li>
-                        <li className="flex justify-between border-b border-zinc-800 pb-1"><span>VOZ SRAP:</span> <span className="text-lime-400">ONLINE</span></li>
-                        <li className="flex justify-between border-b border-zinc-800 pb-1"><span>VEO ENGINE:</span> <span className="text-fuchsia-400">CARGADO</span></li>
-                        <li className="flex justify-between"><span>UBICACIÓN:</span> <span className="text-white">CIFRADO</span></li>
+                        <li className="flex justify-between border-b border-zinc-800 pb-1"><span>AI LATENCY:</span> <span className="text-lime-400">OPTIMIZED</span></li>
+                        <li className="flex justify-between border-b border-zinc-800 pb-1"><span>SRAP VOICE:</span> <span className="text-lime-400">ONLINE</span></li>
+                        <li className="flex justify-between border-b border-zinc-800 pb-1"><span>VEO ENGINE:</span> <span className="text-fuchsia-400">LOADED</span></li>
+                        <li className="flex justify-between"><span>LOCATION:</span> <span className="text-white">ENCRYPTED</span></li>
                     </ul>
                 </div>
             </div>
@@ -122,13 +145,21 @@ function App() {
       <footer className="mt-20 border-t border-zinc-900 py-12 bg-black/40">
         <div className="max-w-7xl mx-auto px-8 text-center">
             <p className="text-zinc-600 text-xs font-mono tracking-widest">
-                DISEÑADO POR CHALAMANDRA MAGISTRAL // ELITE ARCHITECTURE // 2025
+                DESIGNED BY CHALAMANDRA MAGISTRAL // ELITE ARCHITECTURE // 2025
             </p>
         </div>
       </footer>
       
       <Chatbot />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <TacticalProvider>
+      <AppContent />
+    </TacticalProvider>
   );
 }
 
