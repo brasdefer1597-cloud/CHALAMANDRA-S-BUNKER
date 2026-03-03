@@ -36,7 +36,7 @@ const VoiceIntelligence: React.FC = () => {
             model: 'gemini-2.5-flash-native-audio-preview-12-2025',
             callbacks: {
                 onopen: () => {
-                    setStatus('Conectado');
+                    setStatus('Connected');
                     const source = inputCtx.createMediaStreamSource(stream);
                     const scriptProcessor = inputCtx.createScriptProcessor(4096, 1, 1);
                     scriptProcessor.onaudioprocess = (e) => {
@@ -69,13 +69,13 @@ const VoiceIntelligence: React.FC = () => {
                 },
                 onclose: () => {
                     setIsActive(false);
-                    setStatus('Cerrado');
+                    setStatus('Closed');
                 }
             },
             config: {
                 responseModalities: [Modality.AUDIO],
                 speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } },
-                systemInstruction: "Actúa como la Decodificadora Magistral. Tono 'Malandra Fresa': callejera pero fina, culta pero ruda. Responde breve, con ritmo SRAP. Eres la voz del búnker."
+                systemInstruction: "Act as the Master Decoder. 'Malandra Fresa' tone: street-smart but refined, cultured but tough. Respond briefly with SRAP rhythm. You are the voice of the bunker."
             }
         });
         sessionRef.current = await sessionPromise;
@@ -101,7 +101,7 @@ const VoiceIntelligence: React.FC = () => {
             </div>
             <div className="text-center">
                 <p className={`font-black text-xl uppercase tracking-widest ${isActive ? 'text-fuchsia-400' : 'text-zinc-600'}`}>{status}</p>
-                <p className="text-xs text-zinc-500 mt-1">SISTEMA VOCAL SRAP // V1.0</p>
+                <p className="text-xs text-zinc-500 mt-1">SRAP VOCAL SYSTEM // V1.0</p>
             </div>
             {isActive && (
                 <div className="flex gap-1 h-8 items-end">

@@ -37,7 +37,7 @@ const StrategySimulator: React.FC = () => {
       const resultText = await simulateScenario(scenarioInput);
       setSimulationResult(resultText);
     } catch (e: any) {
-      setSimulationError(e.message || "Fallo en la simulación del escenario. Inténtalo de nuevo.");
+      setSimulationError(e.message || "Scenario simulation failed. Try again.");
     } finally {
       setIsSimulating(false);
     }
@@ -47,17 +47,17 @@ const StrategySimulator: React.FC = () => {
     <div className="bg-gray-900 border border-gray-700 rounded-xl p-8 shadow-2xl space-y-6">
       <h3 className="text-3xl font-bold text-fuchsia-500 flex items-center gap-3">
         <Dices size={28} />
-        Simulador de Escenarios Estratégicos
+        Strategic Scenario Simulator
       </h3>
       <p className="text-gray-400">
-        Introduce un movimiento o estrategia de alto nivel y la IA generará una respuesta táctica de las autoridades (la "Contra-Movida").
+        Enter a high-level move or strategy and the AI will generate a tactical response from authorities (the "Counter-Move").
       </p>
       <div className="flex flex-col md:flex-row gap-4">
         <input
           type="text"
           value={scenarioInput}
           onChange={(e) => setScenarioInput(e.target.value)}
-          placeholder="Ej: Intentar corromper a la Torre de control fronterizo..."
+          placeholder="e.g., Attempt to corrupt the border control Rook..."
           className="flex-grow p-3 rounded-lg bg-gray-950 border border-gray-800 text-white placeholder-gray-600 focus:ring-amber-400 focus:border-amber-400 transition-colors"
         />
         <button
@@ -70,15 +70,15 @@ const StrategySimulator: React.FC = () => {
             }
           `}
         >
-          {isSimulating ? <><Dices size={20} className="animate-spin" /> Simulando...</> : <><Activity size={20} /> Analizar Movida</>}
+          {isSimulating ? <><Dices size={20} className="animate-spin" /> Simulating...</> : <><Activity size={20} /> Analyze Move</>}
         </button>
       </div>
 
       {(simulationResult || simulationError || isSimulating) && (
         <div className={`mt-6 p-5 bg-gray-950 border rounded-lg shadow-inner transition-opacity duration-500 ${isSimulating ? 'border-fuchsia-500/50 animate-pulse' : 'border-fuchsia-500/50'}`}>
-          <h4 className="text-lg font-bold text-fuchsia-400 mb-2 flex items-center gap-2"><Swords size={20} /> Resultado de Simulación (IA)</h4>
+          <h4 className="text-lg font-bold text-fuchsia-400 mb-2 flex items-center gap-2"><Swords size={20} /> Simulation Result (AI)</h4>
           {simulationError && <p className="text-red-400 font-medium">{simulationError}</p>}
-          {isSimulating && !simulationResult && <p className="text-gray-400">Analizando vectores... por favor, espera.</p>}
+          {isSimulating && !simulationResult && <p className="text-gray-400">Analyzing vectors... please wait.</p>}
           {displayedResult && <div className="text-gray-300 whitespace-pre-wrap leading-relaxed text-sm prose prose-sm prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: displayedResult.replace(/\n/g, '<br />') + (isSimulating ? '' : '<span class="blinking-cursor">▍</span>') }}></div>}
         </div>
       )}

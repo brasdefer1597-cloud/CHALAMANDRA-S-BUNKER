@@ -39,10 +39,10 @@ const IntelligenceTerminal: React.FC = () => {
         <div className="bg-zinc-950 border border-fuchsia-500/30 rounded-2xl p-6 shadow-[0_0_50px_rgba(217,70,239,0.1)]">
             <div className="flex gap-4 mb-6 overflow-x-auto pb-2 scrollbar-hide">
                 {[
-                    { id: 'thinking', icon: Brain, label: 'Modo Pensamiento' },
-                    { id: 'grounding', icon: Search, label: 'Rastreo Real' },
+                    { id: 'thinking', icon: Brain, label: 'Thinking Mode' },
+                    { id: 'grounding', icon: Search, label: 'Real Tracking' },
                     { id: 'image', icon: ImageIcon, label: 'Visual Pro' },
-                    { id: 'video', icon: Video, label: 'Cinemática Veo' }
+                    { id: 'video', icon: Video, label: 'Veo Cinematic' }
                 ].map(m => (
                     <button
                         key={m.id}
@@ -61,7 +61,7 @@ const IntelligenceTerminal: React.FC = () => {
                 <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder={`Ingresa directiva para ${mode}...`}
+                    placeholder={`Enter directive for ${mode}...`}
                     className="w-full h-32 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-fuchsia-100 placeholder-zinc-700 focus:ring-2 focus:ring-fuchsia-500 focus:border-transparent transition-all"
                 />
                 <button
@@ -70,7 +70,7 @@ const IntelligenceTerminal: React.FC = () => {
                     className="w-full bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-fuchsia-900/20 transition-all active:scale-95"
                 >
                     {loading ? <Loader2 className="animate-spin" /> : <Zap size={20} />}
-                    {loading ? 'PROCESANDO EN EL BÚNKER...' : 'EJECUTAR ORDEN'}
+                    {loading ? 'PROCESSING IN THE BUNKER...' : 'EXECUTE ORDER'}
                 </button>
             </div>
 
@@ -87,7 +87,7 @@ const IntelligenceTerminal: React.FC = () => {
                             ))}
                         </div>
                     )}
-                    {result.image && <img src={result.image} alt="Generación" className="w-full rounded-xl border border-zinc-700 shadow-2xl mt-4" />}
+                    {result.image && <img src={result.image} alt="Generation" className="w-full rounded-xl border border-zinc-700 shadow-2xl mt-4" />}
                     {result.video && (
                         <video src={result.video} controls className="w-full rounded-xl border border-zinc-700 shadow-2xl mt-4" autoPlay loop />
                     )}

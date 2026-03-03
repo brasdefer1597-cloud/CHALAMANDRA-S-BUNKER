@@ -22,12 +22,12 @@ export const analyzeThinking = async (prompt: string): Promise<string> => {
             contents: prompt,
             config: {
                 thinkingConfig: { thinkingBudget: 32768 },
-                systemInstruction: "Eres la Decodificadora Magistral. Tono: 'Malandra Fresa'. Analiza con profundidad extrema, sin rodeos, callejera pero fina."
+                systemInstruction: "You are the Master Decoder. Tone: 'Malandra Fresa'. Analyze with extreme depth, no beating around the bush, street-smart but refined."
             }
         });
         return response.text || "";
     } catch (e) {
-        throw new GeminiServiceError("El cerebro del búnker está saturado. Reintenta la movida.");
+        throw new GeminiServiceError("The bunker's brain is saturated. Retry the move.");
     }
 };
 
@@ -43,7 +43,7 @@ export const searchGrounding = async (query: string) => {
     return {
         text: response.text,
         links: response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map((c: any) => ({
-            title: c.web?.title || "Enlace",
+            title: c.web?.title || "Link",
             uri: c.web?.uri
         })) || []
     };
@@ -63,7 +63,7 @@ export const mapsGrounding = async (query: string, lat?: number, lng?: number) =
     return {
         text: response.text,
         links: response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map((c: any) => ({
-            title: c.maps?.title || "Ubicación",
+            title: c.maps?.title || "Location",
             uri: c.maps?.uri
         })) || []
     };
@@ -72,24 +72,24 @@ export const mapsGrounding = async (query: string, lat?: number, lng?: number) =
 // FIX: Added generateCounterStrategy to handle piece-specific tactical analysis
 export const generateCounterStrategy = async (piece: ChessPiece): Promise<string> => {
     const ai = getAI();
-    const prompt = `Analiza al arquetipo '${piece.criminalRole}' (basado en el '${piece.name}' de ajedrez). 
-    Descripción: ${piece.description}. 
-    Función criminal: ${piece.criminalFunction}. 
-    Nivel de riesgo: ${piece.riskLevel}.
+    const prompt = `Analyze the archetype '${piece.criminalRole}' (based on the chess '${piece.name}'). 
+    Description: ${piece.description}. 
+    Criminal function: ${piece.criminalFunction}. 
+    Risk level: ${piece.riskLevel}.
     
-    Proporciona un plan detallado de neutralización o contra-estrategia.`;
+    Provide a detailed neutralization plan or counter-strategy.`;
     
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
             contents: prompt,
             config: {
-                systemInstruction: "Eres la Decodificadora Magistral. Tono: 'Malandra Fresa'. Proporciona tácticas de neutralización criminal usando analogías de ajedrez. Sé concisa y letal."
+                systemInstruction: "You are the Master Decoder. Tone: 'Malandra Fresa'. Provide criminal neutralization tactics using chess analogies. Be concise and lethal."
             }
         });
-        return response.text || "Error en el análisis táctico.";
+        return response.text || "Error in tactical analysis.";
     } catch (e) {
-        throw new GeminiServiceError("Fallo en el servidor de inteligencia.");
+        throw new GeminiServiceError("Intelligence server failure.");
     }
 };
 
@@ -104,12 +104,12 @@ export const generateChatContent = async (history: ChatMessage[]): Promise<strin
                 parts: m.parts.map(p => ({ text: p.text }))
             })),
             config: {
-                systemInstruction: "Eres 'Analista Táctico', un experto en la analogía del 'Ajedrez Criminal'. Mantén un tono profesional, analítico y enigmático. Responde sobre roles y estrategias."
+                systemInstruction: "You are the 'Tactical Analyst', an expert in the 'Criminal Chess' analogy. Maintain a professional, analytical, and enigmatic tone. Respond about roles and strategies."
             }
         });
-        return response.text || "Sin respuesta táctica.";
+        return response.text || "No tactical response.";
     } catch (e) {
-        throw new GeminiServiceError("Conexión perdida con el Analista Táctico.");
+        throw new GeminiServiceError("Connection lost with the Tactical Analyst.");
     }
 };
 
@@ -119,14 +119,14 @@ export const simulateScenario = async (scenario: string): Promise<string> => {
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
-            contents: `Simula la contra-movida de las autoridades ante este escenario: ${scenario}`,
+            contents: `Simulate the counter-move of the authorities in response to this scenario: ${scenario}`,
             config: {
-                systemInstruction: "Eres la Inteligencia del Búnker. Tu tarea es predecir la respuesta táctica (la 'Contra-Movida') de las autoridades o rivales ante un movimiento criminal propuesto."
+                systemInstruction: "You are the Bunker Intelligence. Your task is to predict the tactical response (the 'Counter-Move') of authorities or rivals to a proposed criminal move."
             }
         });
-        return response.text || "Simulación fallida.";
+        return response.text || "Simulation failed.";
     } catch (e) {
-        throw new GeminiServiceError("Error en el simulador de escenarios.");
+        throw new GeminiServiceError("Error in the scenario simulator.");
     }
 };
 
@@ -136,7 +136,7 @@ export const generateVideoVeo = async (prompt: string, aspectRatio: '16:9' | '9:
     const ai = getAI();
     let operation = await ai.models.generateVideos({
         model: 'veo-3.1-fast-generate-preview',
-        prompt: `Cinemática táctica de búnker, estilo Chalamandra: ${prompt}`,
+        prompt: `Tactical bunker cinematic, Chalamandra style: ${prompt}`,
         config: { numberOfVideos: 1, resolution: '720p', aspectRatio }
     });
     while (!operation.done) {
@@ -151,7 +151,7 @@ export const generateImagePro = async (prompt: string, size: '1K' | '2K' | '4K',
     const ai = getAI();
     const response = await ai.models.generateContent({
         model: 'gemini-3-pro-image-preview',
-        contents: `Iconografía criminal de alto nivel, estética neón fucsia y verde ácido: ${prompt}`,
+        contents: `High-level criminal iconography, fuchsia neon and acid green aesthetic: ${prompt}`,
         config: { imageConfig: { imageSize: size, aspectRatio: ratio as any } }
     });
     const part = response.candidates?.[0].content.parts.find(p => p.inlineData);
@@ -165,7 +165,7 @@ export const editImageFlash = async (base64Img: string, prompt: string) => {
         contents: {
             parts: [
                 { inlineData: { data: base64Img.split(',')[1], mimeType: 'image/png' } },
-                { text: `Modifica esta imagen táctica: ${prompt}` }
+                { text: `Modify this tactical image: ${prompt}` }
             ]
         }
     });
@@ -180,7 +180,7 @@ export const transcribeAudio = async (base64Audio: string) => {
     const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: {
-            parts: [{ inlineData: { data: base64Audio, mimeType: 'audio/pcm;rate=16000' } }, { text: "Transcribe exactamente este reporte de audio." }]
+            parts: [{ inlineData: { data: base64Audio, mimeType: 'audio/pcm;rate=16000' } }, { text: "Transcribe this audio report exactly." }]
         }
     });
     return response.text;

@@ -6,7 +6,7 @@ import { ChatMessage } from '../types';
 const Chatbot: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([
-        { role: 'model', parts: [{ text: "Saludos. Soy el Analista Táctico. ¿Qué aspecto de la estrategia deseas analizar?" }] }
+        { role: 'model', parts: [{ text: "Greetings. I am the Tactical Analyst. Which aspect of the strategy do you wish to analyze?" }] }
     ]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -53,7 +53,7 @@ const Chatbot: React.FC = () => {
             setMessages(prevMessages => [...prevMessages, modelMessage]);
             playSound('audio-success');
         } catch (error: any) {
-            const errorMessage: ChatMessage = { role: 'model', parts: [{ text: error.message || "Ha ocurrido un error al procesar tu solicitud." }] };
+            const errorMessage: ChatMessage = { role: 'model', parts: [{ text: error.message || "An error occurred while processing your request." }] };
             setMessages(prevMessages => [...prevMessages, errorMessage]);
         } finally {
             setIsLoading(false);
@@ -65,7 +65,7 @@ const Chatbot: React.FC = () => {
             <button
                 onClick={toggleChat}
                 className="fixed bottom-6 right-6 bg-fuchsia-600 text-white p-4 rounded-full shadow-lg hover:bg-fuchsia-500 transition-transform transform hover:scale-110 z-50"
-                aria-label="Abrir chat de análisis"
+                aria-label="Open analysis chat"
             >
                 {isOpen ? <X size={28} /> : <MessageSquare size={28} />}
             </button>
@@ -75,7 +75,7 @@ const Chatbot: React.FC = () => {
                     <header className="flex items-center justify-between p-4 border-b border-gray-700 shrink-0">
                         <div className="flex items-center gap-3">
                             <Bot className="text-fuchsia-400" />
-                            <h3 className="font-bold text-white">Analista Táctico</h3>
+                            <h3 className="font-bold text-white">Tactical Analyst</h3>
                         </div>
                         <button onClick={toggleChat} className="text-gray-400 hover:text-white">
                             <X size={20} />
@@ -116,7 +116,7 @@ const Chatbot: React.FC = () => {
                                 type="text"
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
-                                placeholder="Pregunta algo..."
+                                placeholder="Ask something..."
                                 className="flex-1 bg-gray-800 border border-gray-600 rounded-full py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500 transition-all"
                                 disabled={isLoading}
                                 onKeyPress={(e) => {
