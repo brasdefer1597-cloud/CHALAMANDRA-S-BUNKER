@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DecoX Dossier // CHALAMANDRA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Space Grotesk', 'sans-serif'],
+            },
+            keyframes: {
+              glitch: {
+                '0%, 100%': { transform: 'skewX(0deg)' },
+                '25%': { transform: 'skewX(-1deg)' },
+                '50%': { transform: 'skewX(1deg)' },
+                '75%': { transform: 'skewX(-0.5deg)' },
+              },
+              fadeIn: {
+                '0%': { opacity: '0', transform: 'translateY(10px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+               bootSequence: {
+                '0%': { content: '"_"' },
+                '5%': { content: '"I_"' },
+                '10%': { content: '"IN_"' },
+                '15%': { content: '"INI_"' },
+                '20%': { content: '"INIT_"' },
+                '25%': { content: '"INITI_"' },
+                '30%': { content: '"INITIA_"' },
+                '35%': { content: '"INITIAL_"' },
+                '40%': { content: '"INITIALI_"' },
+                '45%': { content: '"INITIALIZ_"' },
+                '50%': { content: '"INITIALIZI_"' },
+                '55%': { content: '"INITIALIZIN_"' },
+                '60%': { content: '"INITIALIZING_"' },
+                '65%': { content: '"INITIALIZING _"' },
+                '70%': { content: '"INITIALIZING S_"' },
+                '75%': { content: '"INITIALIZING SR_"' },
+                '80%': { content: '"INITIALIZING SRA_"' },
+                '85%': { content: '"INITIALIZING SRAP_"' },
+                '90%': { content: '"INITIALIZING SRAP PROTOCOL_"' },
+                '100%': { content: '"SYSTEM ONLINE_"' }
+              },
+              scanline: {
+                '0%': { transform: 'translateY(-100%)' },
+                '100%': { transform: 'translateY(100%)' }
+              },
+              "pulse-border": {
+                "0%, 100%": {
+                  borderColor: "rgba(253, 224, 71, 0.4)",
+                  boxShadow: "0 0 10px rgba(253, 224, 71, 0.2), inset 0 0 5px rgba(253, 224, 71, 0.1)",
+                },
+                "50%": {
+                  borderColor: "rgba(253, 224, 71, 1)",
+                  boxShadow: "0 0 25px rgba(253, 224, 71, 0.5), inset 0 0 10px rgba(253, 224, 71, 0.3)",
+                },
+              },
+              "move-bg": {
+                "0%": { backgroundPosition: "0 0, 0 0, 0 0" },
+                "100%": { backgroundPosition: "0 0, -1000px 1000px, -1000px 1000px" },
+              },
+              "flipIn": {
+                "0%": { transform: "rotateX(-90deg)", opacity: "0" },
+                "100%": { transform: "rotateX(0deg)", opacity: "1" },
+              },
+              "blink": {
+                "50%": { opacity: "0" },
+              },
+              "soft-pulse": {
+                "0%, 100%": {
+                  transform: "scale(1)",
+                  opacity: "0.5",
+                },
+                "50%": {
+                  transform: "scale(1.2)",
+                  opacity: "1",
+                },
+              },
+            },
+            animation: {
+              glitch: 'glitch 1s ease-in-out infinite',
+              fadeIn: 'fadeIn 0.5s ease-out forwards',
+              bootSequence: 'bootSequence 3s steps(30, end) forwards',
+              scanline: 'scanline 8s linear infinite',
+              "pulse-border": "pulse-border 2.5s ease-in-out infinite",
+              "move-bg": "move-bg 60s linear infinite",
+              "flipIn": "flipIn 0.5s ease-out forwards",
+              "soft-pulse": "soft-pulse 3s ease-in-out infinite",
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-color: #020617;
+        color: #e2e8f0;
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+      }
+      .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+      }
+      #app-background {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background-color: #020617;
+        background-image: 
+            radial-gradient(ellipse 80% 50% at 50% 50%, rgba(139, 92, 246, 0.1), transparent),
+            linear-gradient(rgba(0,0,0,0.2) 2px, transparent 2px),
+            linear-gradient(90deg, rgba(0,0,0,0.2) 2px, transparent 2px);
+        background-size: 100% 100%, 50px 50px, 50px 50px;
+        opacity: 0.5;
+        animation: move-bg 60s linear infinite;
+      }
+      #loader {
+        position: fixed;
+        inset: 0;
+        background-color: #020617;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        overflow: hidden;
+      }
+      #loader::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to bottom,
+          transparent 0%,
+          rgba(255, 255, 255, 0.03) 50%,
+          transparent 100%
+        );
+        background-size: 100% 4px;
+        pointer-events: none;
+        z-index: 101;
+      }
+      .scanline-effect {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100px;
+        background: linear-gradient(to bottom, transparent, rgba(168, 85, 247, 0.05), transparent);
+        animation: scanline 4s linear infinite;
+        pointer-events: none;
+        z-index: 102;
+      }
+      #loader.hidden {
+        display: none;
+      }
+      #loader.hiding {
+        transition: opacity 0.5s ease-in 0.3s;
+        opacity: 0;
+        pointer-events: none;
+      }
+      #loader.hiding .loader-logo,
+      #loader.hiding .loader-text {
+        transition: opacity 0.3s ease-out;
+        opacity: 0;
+      }
+      .loader-logo {
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: #fuchsia-500;
+        margin-bottom: 1rem;
+        animation: glitch 1.5s infinite;
+        font-family: 'Space Grotesk', monospace;
+        letter-spacing: 0.2em;
+      }
+      .loader-text::after {
+        content: "_";
+        animation: bootSequence 3s steps(30, end) forwards;
+      }
+      .loader-text {
+        color: #amber-400;
+        font-family: 'Space Grotesk', monospace;
+        min-height: 1.5rem;
+      }
+      .blinking-cursor {
+        animation: blink 1s step-end infinite;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="app-background"></div>
+    <div id="loader">
+      <div class="scanline-effect"></div>
+      <div class="loader-logo">[ DECOX // ARCHITECTURE ]</div>
+      <div class="loader-text"></div>
+    </div>
+    <div id="root"></div>
+    
+    <!-- SRAP Audio Layer -->
+    <audio id="audio-ambient" loop>
+      <source src="https://aistudio.google.com/static/sounds/app_intro_sequence.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="audio-click">
+      <source src="https://aistudio.google.com/static/sounds/uiclick.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="audio-hover">
+      <source src="https://aistudiocdn.com/static/sounds/uihover.mp3" type="audio/mpeg">
+    </audio>
+     <audio id="audio-success">
+      <source src="https://aistudiocdn.com/static/sounds/uisuccess.mp3" type="audio/mpeg">
+    </audio>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
