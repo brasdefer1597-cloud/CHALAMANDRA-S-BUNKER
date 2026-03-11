@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Video, Image as ImageIcon, Map, Search, Brain, Zap, Loader2, Play, Edit, Globe, FileText } from 'lucide-react';
-import { generateVideoVeo, generateImagePro, searchGrounding, mapsGrounding, analyzeThinking, editImageFlash, analyzeMedia } from '../services/geminiService';
+import { generateVideoVeo, generateImagePro, searchGrounding, mapsGrounding, editImageFlash, analyzeMedia } from '../services/geminiService';
+import { analyzeThinkingOpenAI } from '../services/openaiService';
 import { useTactical } from '../context/TacticalContext';
 
 const IntelligenceTerminal: React.FC = () => {
@@ -44,7 +45,7 @@ const IntelligenceTerminal: React.FC = () => {
         setResult(null);
         try {
             if (mode === 'thinking') {
-                const res = await analyzeThinking(input);
+                const res = await analyzeThinkingOpenAI(input);
                 setResult({ text: res });
                 addToHistory(`Thinking: ${input.substring(0, 20)}...`);
             } else if (mode === 'grounding') {

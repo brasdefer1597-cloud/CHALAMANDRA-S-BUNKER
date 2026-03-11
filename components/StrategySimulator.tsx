@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Dices, Activity, Swords } from 'lucide-react';
-import { analyzeThinking } from '../services/geminiService';
+import { simulateScenarioOpenAI } from '../services/openaiService';
 import { useTactical } from '../context/TacticalContext';
 
 const StrategySimulator: React.FC = () => {
@@ -36,7 +36,7 @@ const StrategySimulator: React.FC = () => {
     setSimulationError(null);
 
     try {
-      const resultText = await analyzeThinking(`Simulate the counter-move of the authorities in response to this scenario: ${scenarioInput}`);
+      const resultText = await simulateScenarioOpenAI(scenarioInput);
       setSimulationResult(resultText);
       addToHistory(`Simulation: ${scenarioInput.substring(0, 20)}...`);
     } catch (e: any) {
