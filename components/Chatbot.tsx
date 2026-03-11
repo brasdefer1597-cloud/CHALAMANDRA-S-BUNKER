@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageSquare, Send, X, Bot } from 'lucide-react';
-import { generateChatContent, generateSpeech, transcribeAudio } from '../services/geminiService';
+import { generateChatContentOpenAI } from '../services/openaiService';
+import { generateSpeech, transcribeAudio } from '../services/geminiService';
 import { ChatMessage } from '../types';
 import { useTactical } from '../context/TacticalContext';
 import { Mic, MicOff, Volume2 } from 'lucide-react';
@@ -118,7 +119,7 @@ const Chatbot: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const modelResponseText = await generateChatContent(newMessages);
+            const modelResponseText = await generateChatContentOpenAI(newMessages);
             const modelMessage: ChatMessage = { role: 'model', parts: [{ text: modelResponseText }] };
             setMessages(prevMessages => [...prevMessages, modelMessage]);
             addToHistory(`Chat: ${trimmedInput.substring(0, 20)}...`);

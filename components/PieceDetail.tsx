@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChessPiece } from '../types';
 import { Shield, Zap, Dices, ArrowRight, LucideIcon } from 'lucide-react';
 import { StarIcon } from './icons/StarIcon';
-import { generateCounterStrategy } from '../services/geminiService';
+import { generateCounterStrategyOpenAI } from '../services/openaiService';
 import { iconMap } from '../mappings/iconMap';
 
 interface PieceDetailProps {
@@ -34,7 +34,7 @@ const PieceDetail: React.FC<PieceDetailProps> = ({ piece, playClickSound, playSu
     setGeneratedStrategy('');
     
     try {
-      const result = await generateCounterStrategy(piece, tacticalState);
+      const result = await generateCounterStrategyOpenAI(piece, tacticalState);
       setGeneratedStrategy(result);
       setLastStrategy(result);
       addAnalyzedPiece(piece.name);
