@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Video, Image as ImageIcon, Map, Search, Brain, Zap, Loader2, Play, Edit, Globe, FileText } from 'lucide-react';
+import { Video, Image as ImageIcon, Map, Search, Brain, Zap, Loader2, Play, Edit, Globe, FileText, ExternalLink } from 'lucide-react';
+import Markdown from 'react-markdown';
 import { generateVideoVeo, generateImagePro, searchGrounding, mapsGrounding, analyzeThinking, editImageFlash, analyzeMedia } from '../services/geminiService';
 import { useTactical } from '../context/TacticalContext';
 
@@ -145,7 +146,7 @@ const IntelligenceTerminal: React.FC = () => {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder={`Enter directive for ${mode}...`}
-                    className="w-full h-32 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-fuchsia-100 placeholder-zinc-700 focus:ring-2 focus:ring-fuchsia-500 focus:border-transparent transition-all"
+                    className="w-full h-32 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-fuchsia-100 placeholder-zinc-700 focus:ring-2 focus:ring-fuchsia-500 focus:border-transparent transition-all custom-scrollbar"
                 />
                 <button
                     onClick={handleAction}
@@ -158,21 +159,57 @@ const IntelligenceTerminal: React.FC = () => {
             </div>
 
             {result && (
-                <div className="mt-8 animate-fadeIn border-t border-zinc-800 pt-6">
+                <div className="mt-8 animate-fadeIn border-t border-zinc-800 pt-6 space-y-6">
                     {result.error && <div className="text-red-400 font-mono bg-red-950/20 p-4 rounded-lg border border-red-500/30">ERROR: {result.error}</div>}
-                    {result.text && <div className="prose prose-invert max-w-none text-zinc-300 font-sans leading-relaxed whitespace-pre-wrap">{result.text}</div>}
-                    {result.links && (
-                        <div className="mt-4 flex flex-wrap gap-2">
-                            {result.links.map((l: any, i: number) => (
-                                <a key={i} href={l.uri} target="_blank" rel="noreferrer" className="text-xs bg-zinc-800 hover:bg-zinc-700 text-fuchsia-400 px-3 py-1 rounded-full border border-fuchsia-500/20">
-                                    {l.title}
-                                </a>
-                            ))}
+                    
+                    {result.text && (
+                        <div className="prose prose-invert max-w-none 
+                            prose-p:text-zinc-300 prose-p:leading-relaxed prose-p:mb-4
+                            prose-headings:text-fuchsia-400 prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tighter prose-headings:mb-4
+                            prose-strong:text-fuchsia-300 prose-strong:font-bold
+                            prose-code:text-fuchsia-200 prose-code:bg-fuchsia-500/10 prose-code:px-1 prose-code:rounded
+                            prose-ul:list-disc prose-ul:pl-5 prose-ul:mb-4
+                            prose-li:text-zinc-400 prose-li:mb-1
+                            prose-a:text-fuchsia-400 prose-a:underline prose-a:font-bold hover:prose-a:text-fuchsia-300 transition-colors
+                        ">
+                            <Markdown>{result.text}</Markdown>
                         </div>
                     )}
-                    {result.image && <img src={result.image} alt="Generation" className="w-full rounded-xl border border-zinc-700 shadow-2xl mt-4" />}
+
+                    {result.groundingMetadata?.groundingChunks && (
+                        <div className="bg-fuchsia-500/5 border border-fuchsia-500/20 rounded-xl p-4">
+                            <h4 className="text-xs font-black text-fuchsia-400 uppercase mb-3 flex items-center gap-2">
+                                <Globe size={14} /> Intel Sources
+                            </h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {result.groundingMetadata.groundingChunks.map((chunk: any, i: number) => (
+                                    chunk.web && (
+                                        <a key={i} href={chunk.web.uri} target="_blank" rel="noopener noreferrer" 
+                                           className="flex items-center justify-between p-2 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 hover:border-fuchsia-500/30 rounded-lg transition-all group">
+                                            <span className="text-xs text-zinc-400 truncate mr-2 group-hover:text-fuchsia-200">{chunk.web.title}</span>
+                                            <ExternalLink size={12} className="text-zinc-600 group-hover:text-fuchsia-400 shrink-0" />
+                                        </a>
+                                    )
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {result.image && (
+                        <div className="relative group rounded-xl overflow-hidden border border-zinc-800 shadow-2xl">
+                            <img src={result.image} alt="Intelligence Asset" className="w-full h-auto" />
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <a href={result.image} download="intel_asset.png" className="bg-fuchsia-600 text-white px-6 py-3 rounded-full font-black text-sm shadow-xl hover:bg-fuchsia-500 transition-all">
+                                    DOWNLOAD ASSET
+                                </a>
+                            </div>
+                        </div>
+                    )}
+
                     {result.video && (
-                        <video src={result.video} controls className="w-full rounded-xl border border-zinc-700 shadow-2xl mt-4" autoPlay loop />
+                        <div className="rounded-xl overflow-hidden border border-zinc-800 shadow-2xl bg-black">
+                            <video src={result.video} controls className="w-full h-auto" autoPlay loop />
+                        </div>
                     )}
                 </div>
             )}
@@ -181,3 +218,4 @@ const IntelligenceTerminal: React.FC = () => {
 };
 
 export default IntelligenceTerminal;
+
