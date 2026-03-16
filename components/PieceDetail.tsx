@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChessPiece } from '../types';
-import { Shield, Zap, Dices, ArrowRight, LucideIcon } from 'lucide-react';
-import { StarIcon } from './icons/StarIcon';
-import { generateCounterStrategy } from '../services/geminiService';
 import { iconMap } from '../mappings/iconMap';
+import { useTactical } from '../context/TacticalContext';
 
 interface PieceDetailProps {
   piece: ChessPiece;
@@ -11,11 +9,8 @@ interface PieceDetailProps {
   playSuccessSound: () => void;
 }
 
-import { useTactical } from '../context/TacticalContext';
-
 const PieceDetail: React.FC<PieceDetailProps> = ({ piece, playClickSound, playSuccessSound }) => {
   const { state: tacticalState, addAnalyzedPiece, setLastStrategy, addToHistory } = useTactical();
-  const Icon = typeof piece.icon === 'string' ? iconMap[piece.icon] : piece.icon;
   const [generatedStrategy, setGeneratedStrategy] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
@@ -47,11 +42,24 @@ const PieceDetail: React.FC<PieceDetailProps> = ({ piece, playClickSound, playSu
     }
   };
 
-  if (!Icon) return null;
+  // --- OPTIMIZATION --- 
+  // All icons are now dynamically resolved from the central iconMap.
+  // This removes conditional rendering logic and makes the component cleaner and easier to maintain.
+  const Icon = iconMap[piece.icon];
+  const DicesIcon = iconMap['Dices'];
+  const StarIcon = iconMap['StarIcon'];
+  const ArrowRightIcon = iconMap['ArrowRight'];
+  const ShieldIcon = iconMap['Shield'];
+  const ZapIcon = iconMap['Zap'];
+
+  if (!Icon) {
+    console.error(`Icon not found for key: ${piece.icon}`);
+    return null; // or render a fallback UI
+  }
 
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden h-full flex flex-col animate-fadeIn">
-      <div className="p-6 border-b border-gray-800 bg-gradient-to-r from-gray-900 to-gray-800" style={{ animationDelay: '100ms' }}>
+      <div className="p-6 border-b border-gray-800 bg-gradient-to-r from-gray-900 to-gray-800">
         <div className="flex justify-between items-start">
             <div className="flex items-center gap-4 animate-fadeIn" style={{ animationDelay: '200ms' }}>
                 <div className={`relative p-4 rounded-xl bg-gray-950 border border-gray-700 ${piece.color}`}>
@@ -92,9 +100,9 @@ const PieceDetail: React.FC<PieceDetailProps> = ({ piece, playClickSound, playSu
                 }`}
             >
                 {isGenerating ? (
-                    <><Dices size={20} className="animate-spin" /> Analyzing...</>
+                    <>{DicesIcon && <DicesIcon size={20} className="animate-spin" />} Analyzing...</>
                 ) : (
-                    <><StarIcon size={20} /> Generate Counter-Strategy <ArrowRight size={20} /></>
+                    <>{StarIcon && <StarIcon size={20} />} Generate Counter-Strategy {ArrowRightIcon && <ArrowRightIcon size={20} />}</>
                 )}
             </button>
         </div>
@@ -102,7 +110,7 @@ const PieceDetail: React.FC<PieceDetailProps> = ({ piece, playClickSound, playSu
         {(generatedStrategy || generationError || isGenerating) && (
             <div className={`mt-6 p-4 bg-gray-950/50 border rounded-lg shadow-inner transition-all duration-300 ${isGenerating ? 'animate-pulse-border' : 'border-fuchsia-500/30'}`}>
                 <h4 className="text-lg font-bold text-fuchsia-400 mb-2 flex items-center gap-2">
-                    <Shield size={20} />
+                    {ShieldIcon && <ShieldIcon size={20} />}
                     Neutralization Plan (AI Analysis)
                 </h4>
                 {isGenerating && !generatedStrategy && !generationError && <p className="text-gray-400 animate-pulse">Generating counter-strategy analysis... The system is correlating attack vectors.</p>}
@@ -114,14 +122,14 @@ const PieceDetail: React.FC<PieceDetailProps> = ({ piece, playClickSound, playSu
         <div className="grid grid-cols-1 gap-4 mt-4 animate-fadeIn" style={{ animationDelay: '600ms' }}>
             <div className="bg-gray-950 p-4 rounded-xl border-l-4 border-indigo-400">
                 <div className="flex items-center gap-2 mb-2">
-                    <Shield size={18} className="text-indigo-400" />
+                    {ShieldIcon && <ShieldIcon size={18} className="text-indigo-400" />}
                     <h4 className="text-sm font-bold text-gray-400 uppercase">In Chess</h4>
                 </div>
                 <p className="text-gray-200">{piece.chessFunction}</p>
             </div>
             <div className="bg-gray-950 p-4 rounded-xl border-l-4 border-fuchsia-500">
                 <div className="flex items-center gap-2 mb-2">
-                    <Zap size={18} className="text-fuchsia-500" />
+                    {ZapIcon && <ZapIcon size={18} className="text-fuchsia-500" />}
                     <h4 className="text-sm font-bold text-gray-400 uppercase">In Crime</h4>
                 </div>
                 <p className="text-gray-200">{piece.criminalFunction}</p>
